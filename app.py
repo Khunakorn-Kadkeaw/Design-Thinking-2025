@@ -38,18 +38,31 @@ if selected_model != "ทั้งหมด":
 # ===============================
 # 🎚 เลือกช่วงราคา
 # ===============================
-min_price = int(df["Price"].min())
-max_price = int(df["Price"].max())
+if len(df) > 0:
 
-price_range = st.slider(
-    "เลือกช่วงราคา",
-    min_price,
-    max_price,
-    (min_price, max_price)
-)
+    min_price = int(df["Price"].min())
+    max_price = int(df["Price"].max())
 
-df = df[(df["Price"] >= price_range[0]) &
-        (df["Price"] <= price_range[1])]
+    if min_price != max_price:
+
+        price_range = st.slider(
+            "เลือกช่วงราคา",
+            min_price,
+            max_price,
+            (min_price, max_price)
+        )
+
+        df = df[
+            (df["Price"] >= price_range[0]) &
+            (df["Price"] <= price_range[1])
+        ]
+
+    else:
+        st.warning("ข้อมูลมีราคาเดียว ไม่สามารถสร้างช่วงราคาได้")
+
+else:
+    st.warning("ไม่พบข้อมูลตามเงื่อนไขที่เลือก")
+    st.stop()
 
 # ===============================
 # 📊 KPI
