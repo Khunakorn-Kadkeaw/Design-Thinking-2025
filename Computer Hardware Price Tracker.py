@@ -5,21 +5,41 @@ import pandas as pd
 
 url = "https://www.jib.co.th/web/product/product_list/2/51"
 
+#คือการกำหนด HTTP Header
+#เพื่อบอกเว็บไซต์ว่า:ฉันคือ Browser  ไม่ใช่ Bot
+#User-Agent คือข้อความที่บอกว่า: ใช้ Browser อะไร /ใช้ระบบปฏิบัติการอะไร
+#เพื่อให้เว็บคิดว่าเป็น browser ทั่วไป
 headers = {
-    "User-Agent": "Mozilla/5.0"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36"
 }
 
+#ส่ง HTTP GET request
+#Server ของเว็บรับคำขอ\Server ส่ง HTML กลับมา
+#เก็บไว้ในตัวแปร page
+
+#เอา HTML ดิบที่ได้จากเว็บ → แปลงให้กลายเป็นโครงสร้างที่ค้นหา tag ได้
+#BeautifulSoup : อ่าน HTML ทั้งหมด แยก tag ออก สร้างโครงสร้างแบบต้นไม้ เก็บไว้ในตัวแปร soup
+#page.content ดึง: HTML ทั้งหมดของหน้าเว็บ
+#'html.parser' : คือการบอก BeautifulSoup ว่า:ใช้วิธีไหนในการแปล HTML
 page = requests.get(url, headers=headers)
 soup = BeautifulSoup(page.content, 'html.parser')
 
 # container สินค้าแต่ละชิ้น
+#ค้นหา tag <div> ทุกตัว ที่มี class ตรงตามที่กำหนด แล้วเก็บไว้ในตัวแปร items
+#soup.find_all : ค้นหา element ใน HTML tree
+#คืนค่ากลับมาเป็น “รายการ (list)” ของ tag ที่ตรงเงื่อนไข
 items = soup.find_all("div", class_="col-md-3 col-sm-4 col-xs-6 divboxpro")
 
+#คือการสร้าง list ว่าง  ไว้สำหรับเก็บข้อมูลที่เราจะดึงจากเว็บ
 data = []
 
+ # ===== ดึงชื่อจาก ตัวแปร items =====
+ #โดยการค้นหา tag <span> ตัวแรกที่มี class ตรงตามที่กำหนดภายในสินค้าแต่ละรายการ แล้วเก็บไว้ในตัวแปร name_tag
+ 
+ #จากนั้นตรวจสอบว่าพบ tag ชื่อสินค้าหรือไม่
+ #หากไม่พบจะข้ามรายการนั้นเพื่อป้องกันข้อผิดพลาด 
+ #จากนั้นจึงดึงข้อความภายใน tag และลบช่องว่างส่วนเกินออก แล้วเก็บไว้ใน name
 for item in items:
-
-    # ===== ดึงชื่อ =====
     name_tag = item.find("span", class_="promo_name")
     if not name_tag:
         continue
@@ -32,8 +52,12 @@ for item in items:
     price_text = price_tag.text.strip()
 
     # ล้างให้เหลือเลข
+    #ลบทุกอย่างที่ไม่ใช่ตัวเลขออกจาก price_text
     price_number = re.sub(r"[^\d]", "", price_text)
-
+    
+    # แปลงชื่อสินค้าเป็นตัวพิมพ์ใหญ่ แล้วตรวจสอบว่ามีคำว่า RTX หรือ RX
+    # เพื่อจัดประเภทการ์ดจอ หากไม่พบจะจัดเป็น Other
+    #\b : ขอบเขตของคำ เพื่อให้แน่ใจว่าค้นหาเฉพาะคำว่า RTX หรือ RX
     # ===== แยก RTX / RX =====
     name_upper = name.upper()
 
@@ -44,6 +68,8 @@ for item in items:
     else:
         series = "Other"
 
+    # เพิ่มข้อมูลสินค้าแต่ละรายการลงใน list data ในรูปแบบ Dictionary
+    #ทำให้ข้อมูลถูกจัดเก็บเป็นโครงสร้างแบบตาราง ซึ่งสามารถนำไปสร้างเป็น DataFrame ของ pandas ต่อได้ง่าย
     # ===== เก็บข้อมูล =====
     data.append({
         "Product": name,
