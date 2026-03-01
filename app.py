@@ -93,16 +93,22 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.write("### RTX")
-    rtx_models = df[df["Series"] == "RTX"][["GPU_Model", "Price"]]
-    st.dataframe(rtx_models.sort_values("Price"))
+    rtx_models = df[df["Series"] == "RTX"][
+        ["Product", "GPU_Model", "VRAM", "Memory_Type", "Price"]
+    ]
+    st.dataframe(
+        rtx_models.sort_values("Price"),
+        use_container_width=True,
+        hide_index=True
+    )
 
 with col2:
     st.write("### RX")
-    rx_models = df[df["Series"] == "RX"][["GPU_Model", "Price"]]
-    st.dataframe(rx_models.sort_values("Price"))
-
-# ===============================
-# 📋 ตารางข้อมูลทั้งหมด
-# ===============================
-st.subheader("📋 ตารางข้อมูล")
-st.dataframe(df)
+    rx_models = df[df["Series"] == "RX"][
+        ["Product", "GPU_Model", "VRAM", "Memory_Type", "Price"]
+    ]
+    st.dataframe(
+        rx_models.sort_values("Price"),
+        use_container_width=True,
+        hide_index=True
+    )
