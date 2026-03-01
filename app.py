@@ -4,55 +4,87 @@ import pandas as pd
 st.set_page_config(page_title="GPU Price Dashboard", layout="wide")
 st.title("📊 GPU Price Dashboard (RTX / RX)")
 
-# ===== อัปโหลดไฟล์ =====
-uploaded_file = st.file_uploader("เลือกไฟล์ CSV", type=["csv"])
-
-# ===== โหลดข้อมูล =====
+# ===== โหลดข้อมูลหลังบ้าน =====
 @st.cache_data
-def load_data(file):
-    df = pd.read_csv(file)
+def load_data():
+    df = pd.read_csv("cleaned_gpu.csv")
     return df
 
-if uploaded_file is not None:
-    df = load_data(uploaded_file)
+df = load_data()
 
-    # ===== ทำความสะอาดราคา =====
-    df['Price'] = df['Price'].astype(str)
-    df['Price'] = df['Price'].str.replace(',', '')
-    df['Price'] = df['Price'].astype(int)
+# ===== ทำความสะอาดราคา =====
+df['Price'] = df['Price'].astype(str)
+df['Price'] = df['Price'].str.replace(',', '')
+df['Price'] = df['Price'].astype(int)
 
-    # ===== ดึงรุ่น GPU =====
-    df['GPU_Model'] = df['Product'].str.extract(
-        r'((RTX|RX)\s?\d{3,4})'
-    )[0]
+# ===== ดึงรุ่น GPU =====
+df['GPU_Model'] = df['Product'].str.extract(
+    r'((RTX|RX)\s?\d{3,4})'
+)[0]
 
-    # ===== Sidebar Filter =====
-    st.sidebar.header("Filter")
+# ===============================
+# 🔍 Search Box
+# ===============================
+search = st.text_input("🔍 ค้นหาชื่อสินค้า")
 
-    series_option = st.sidebar.selectbox(
-        "เลือก Series",
-        options=["All", "RTX", "RX"]
-    )
+if search:
+    df = df[df["Product"].str.contains(search, case=False, na=False)]
 
-    if series_option != "All":
-        df = df[df['Series'] == series_option]
+# ===============================
+# 🎚 เลือกช่วงราคา
+# ===============================
+min_price = int(df["Price"].min())
+max_price = int(df["Price"].max())
 
-    # ===== แสดงข้อมูล =====
-    st.subheader("📋 ตารางข้อมูล")
-    st.dataframe(df)
+price_range = st.slider(
+    "เลือกช่วงราคา",
+    min_price,
+    max_price,
+    (min_price, max_price)
+)
 
-    # ===== สถิติ =====
-    st.subheader("📈 สถิติราคา")
+df = df[(df["Price"] >= price_range[0]) &
+        (df["Price"] <= price_range[1])]
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("จำนวนสินค้า", len(df))
-    col2.metric("ราคาเฉลี่ย", f"{df['Price'].mean():,.0f} บาท")
-    col3.metric("ราคาสูงสุด", f"{df['Price'].max():,.0f} บาท")
+# ===============================
+# 📊 KPI
+# ===============================
+st.subheader("📈 สถิติภาพรวม")
 
-    # ===== กราฟ =====
-    st.subheader("📊 ราคาเฉลี่ยแยกตามรุ่น")
-    avg_price = df.groupby("GPU_Model")['Price'].mean().sort_values()
-    st.bar_chart(avg_price)
+col1, col2, col3, col4 = st.columns(4)
 
-else:
-    st.info("กรุณาเลือกไฟล์ก่อน")
+col1.metric("จำนวนสินค้า", len(df))
+col2.metric("ราคาเฉลี่ย", f"{df['Price'].mean():,.0f} บาท")
+col3.metric("ราคาสูงสุด", f"{df['Price'].max():,.0f} บาท")
+col4.metric("ราคาต่ำสุด", f"{df['Price'].min():,.0f} บาท")
+
+# ===============================
+# 📊 เปรียบเทียบ RTX vs RX
+# ===============================
+st.subheader("📊 เปรียบเทียบ RTX vs RX ในช่วงราคานี้")
+
+series_avg = df.groupby("Series")["Price"].mean()
+st.bar_chart(series_avg)
+
+# ===============================
+# 📌 รุ่นที่อยู่ในช่วงราคานี้
+# ===============================
+st.subheader("📌 รุ่นที่อยู่ในช่วงราคานี้")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.write("### RTX")
+    rtx_models = df[df["Series"] == "RTX"][["GPU_Model", "Price"]]
+    st.dataframe(rtx_models.sort_values("Price"))
+
+with col2:
+    st.write("### RX")
+    rx_models = df[df["Series"] == "RX"][["GPU_Model", "Price"]]
+    st.dataframe(rx_models.sort_values("Price"))
+
+# ===============================
+# 📋 ตารางข้อมูลทั้งหมด
+# ===============================
+st.subheader("📋 ตารางข้อมูล")
+st.dataframe(df)
