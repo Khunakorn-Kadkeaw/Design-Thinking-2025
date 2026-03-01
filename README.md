@@ -59,8 +59,8 @@ Plotly / Matplotlib
 ## 📦 การติดตั้งและการใช้งาน (Setup & Installation)
 1. ทำการโหลด python จาก 'https://www.python.org/downloads/'
 2. ทำการติดตั้ง VScode เพื่อใช้ในการการสกัดข้อมูล จาก 'https://code.visualstudio.com/download'
-3. ทำการสกัดข้อมูลที่ต้องใช้ ใน VScode ด้วยภาษา python 'https://github.com/Makin-Thaijaroen/Design-Thinking-2025/blob/main/Design.py'
-4. ทำการเชื่อม Steamlit กับ github เพื่อที่จะได้สร้างหน้าเว็ป 'https://share.streamlit.io/?utm_source=streamlit&utm_medium=referral&utm_campaign=main&utm_content=-ss-streamlit-io-topright'
+3. ทำการสกัดข้อมูลที่ต้องใช้ ใน VScode ด้วยภาษา python 'https://github.com/Khunakorn-Kadkeaw/Design-Thinking-2025/blob/main/Computer%20Hardware%20Price%20Tracker.py'
+4. ทำการเชื่อม Steamlit กับ github เพื่อที่จะได้สร้างหน้าเว็ป 'https://design-thinking-2025-mgczlsnrkesy9vwyf6tam6.streamlit.app/'
 5. นำไฟล์ csv ที่ได้จากการ scraping มาอัปโหลดใน github เพื่อที่จะได้นำไฟล์ csv มาใช้ในการสร้างเว็ป
 
 ## 🧾 เอกสารอ้างอิงที่ใช่ในการทำงาน
