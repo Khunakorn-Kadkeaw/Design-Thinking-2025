@@ -94,7 +94,7 @@ col1, col2 = st.columns(2)
 with col1:
     st.write("### RTX")
     rtx_models = df[df["Series"] == "RTX"][
-        ["Product", "GPU_Model", "VRAM", "Memory_Type", "Price"]
+        ["Product", "GPU_Model", "VRAM", "Price"]
     ]
     st.dataframe(
         rtx_models.sort_values("Price"),
@@ -105,7 +105,7 @@ with col1:
 with col2:
     st.write("### RX")
     rx_models = df[df["Series"] == "RX"][
-        ["Product", "GPU_Model", "VRAM", "Memory_Type", "Price"]
+        ["Product", "GPU_Model", "VRAM", "Price"]
     ]
     st.dataframe(
         rx_models.sort_values("Price"),
