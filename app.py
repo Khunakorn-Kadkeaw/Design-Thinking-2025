@@ -25,10 +25,15 @@ df['GPU_Model'] = df['Product'].str.extract(
 # ===============================
 # 🔍 Search Box
 # ===============================
-search = st.text_input("🔍 ค้นหาชื่อสินค้า")
+model_list = sorted(df["GPU_Model"].dropna().unique())
 
-if search:
-    df = df[df["Product"].str.contains(search, case=False, na=False)]
+selected_model = st.selectbox(
+    "เลือกรุ่น GPU",
+    ["ทั้งหมด"] + model_list
+)
+
+if selected_model != "ทั้งหมด":
+    df = df[df["GPU_Model"] == selected_model]
 
 # ===============================
 # 🎚 เลือกช่วงราคา
