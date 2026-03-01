@@ -85,3 +85,38 @@ print(df)
 df.to_csv("gpu_prices.csv", index=False, encoding="utf-8-sig")
 
 print("บันทึกไฟล์ recipes_dataset.csv สำเร็จ")
+
+# Data Cleaning
+#ลบข้อมูลซ้ำ
+#เว็บบางทีมีสินค้าเดิมซ้ำ
+#ถ้าไม่ลบ → วิเคราะห์ผิด
+df = df.drop_duplicates()
+
+#แปลงราคาเป็นตัวเลข
+#ตอน scrape ราคายังเป็น string
+#ถ้าไม่แปลง → คำนวณค่าเฉลี่ยไม่ได้
+df['Price'] = df['Price'].astype(str)
+df['Price'] = df['Price'].str.replace(',', '')
+df['Price'] = df['Price'].astype(int)
+
+#ตรวจ Missing Value
+#เช็คว่ามีข้อมูลหายไหม
+#ถ้ามี → ต้องจัดการก่อนวิเคราะห์
+df.isnull().sum()
+
+#Feature Engineering
+#ดึงเฉพาะชื่อรุ่น 
+
+#เพราะชื่อสินค้าเต็ม ๆ ใช้วิเคราะห์ยาก
+#ต้องการ “รุ่นการ์ดจอ” เป็นตัวแปรหลัก
+df['GPU_Model'] = df['Product'].str.extract(r'((RTX|RX)\s?\d{3,4})')[0]
+# ===== Extract VRAM =====
+df["VRAM"] = df["Product"].str.extract(
+    r"(\d+\s?GB)",
+    expand=False
+)
+
+#Export Data ที่ทำความสะอาดแล้ว
+import os
+os.makedirs("data", exist_ok=True)
+df.to_csv("data/cleaned_gpu.csv", index=False)
